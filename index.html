@@ -61,6 +61,39 @@ h2 {
   }
 }
 
+
+@media (max-width: 600px) {
+  body {
+    padding: 20px 10px; /* отступ сверху/снизу и по бокам */
+  }
+
+  .card {
+    padding: 15px;        /* меньше, чтобы фон был виден */
+    border-radius: 12px;
+    max-width: 95%;       /* чтобы не занимала весь экран */
+  }
+
+  h2 { font-size: 20px; }
+  label { font-size: 14px; }
+  select, textarea, input, button { font-size: 14px; padding: 10px; }
+  .price-box { font-size: 16px; }
+
+  input[type=range] {
+    height: 6px; /* чуть тоньше, чтобы не давило */
+  }
+
+  input[type=range]::-webkit-slider-thumb,
+  input[type=range]::-moz-range-thumb {
+    width: 24px; height: 24px; /* чуть меньше, удобнее держать */
+  }
+}
+
+
+
+
+
+
+
     label {display:block;margin:15px 0 5px;font-weight:600;}
     select, textarea, input, button {
       width:100%; padding:12px; border:1px solid #ccc;
