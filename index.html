@@ -6,20 +6,64 @@
   <title>Заявка на работу</title>
   <style>
     :root { --bg1:#4facfe; --bg2:#00f2fe; }
-    body {
-      margin:0; min-height:100vh; display:grid; place-items:center;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, var(--bg1), var(--bg2));
-    }
-    .card {
-      background:white; padding:25px; border-radius:16px;
-      box-shadow:0 8px 25px rgba(0,0,0,0.2);
-      max-width:460px; width:100%;
-    }
-    h2 {margin:0 0 15px;text-align:center;}
+   body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 600px; /* было 460px */
+}
+
+h2 {
+  margin: 0 0 20px;
+  text-align: center;
+  font-size: 1.6rem;
+}
+
+.slider-wrap {
+  margin: 15px 0 25px;
+}
+
+.slider-label {
+  text-align: center;
+  font-size: 15px;
+  color: #444;
+  margin-top: 8px;
+}
+
+/* на больших экранах */
+@media (min-width: 900px) {
+  .card {
+    max-width: 800px;
+    padding: 40px;
+  }
+  h2 {
+    font-size: 2rem;
+  }
+  label {
+    font-size: 1.1rem;
+  }
+  input, select, textarea {
+    font-size: 1rem;
+  }
+}
+
     label {display:block;margin:15px 0 5px;font-weight:600;}
     select, textarea, input, button {
-      width:100%; padding:10px; border:1px solid #ccc;
+      width:100%; padding:12px; border:1px solid #ccc;
       border-radius:10px; font-size:15px;
     }
     textarea {resize:vertical; min-height:70px;}
@@ -32,23 +76,41 @@
       margin-top:12px; font-size:18px; font-weight:bold;
       text-align:center; color:#222;
     }
+
     /* ==== стиль ползунков ==== */
     .slider-wrap {margin:10px 0 20px;}
     .slider-label {text-align:center;font-size:14px;color:#444;margin-top:5px;}
+
     input[type=range] {
-      width:98%;
+      width:100%;
       -webkit-appearance:none;
-      height:6px; border-radius:5px;
+      height:8px; border-radius:5px;
       background:#ddd; outline:none;
     }
+    /* Chrome/Edge/Safari */
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance:none; appearance:none;
-      width:20px; height:20px; border-radius:50%;
+      width:28px; height:28px; border-radius:50%;
       background:var(--bg1);
       cursor:pointer; box-shadow:0 0 5px rgba(0,0,0,.3);
       transition:.2s;
     }
     input[type=range]::-webkit-slider-thumb:hover {background:var(--bg2);}
+    /* Firefox */
+    input[type=range]::-moz-range-thumb {
+      width:28px; height:28px; border-radius:50%;
+      background:var(--bg1);
+      cursor:pointer; border:none;
+    }
+
+    /* ==== адаптивность ==== */
+    @media (max-width: 600px) {
+      .card {padding:15px; border-radius:12px;}
+      h2 {font-size:20px;}
+      label {font-size:14px;}
+      select, textarea, input, button {font-size:14px; padding:10px;}
+      .price-box {font-size:16px;}
+    }
   </style>
 </head>
 <body>
@@ -91,8 +153,8 @@
   </div>
 
   <script>
-    const BOT_TOKEN = "8244708473:AAHJlgF_L4N1LXrHrX7frWjvtL-pMNsDuBM";
-    const CHAT_ID = 123456789; // <-- твой числовой chat_id
+    const BOT_TOKEN = "ТОКЕН_ТУТ";
+    const CHAT_ID = 123456789;
 
     const workType = document.getElementById("workType");
     const daysRange = document.getElementById("daysRange");
@@ -109,26 +171,42 @@
       drugoe: 800
     };
 
+    function updatePagesSlider() {
+      if (workType.value === "prezentaciya") {
+        pagesRange.min = 5;
+        pagesRange.max = 20;
+        if (pagesRange.value > 20) pagesRange.value = 10;
+        pagesLabel.textContent = pagesRange.value + " слайдов";
+      } else {
+        pagesRange.min = 20;
+        pagesRange.max = 80;
+        if (pagesRange.value < 20) pagesRange.value = 40;
+        pagesLabel.textContent = pagesRange.value + " страниц";
+      }
+      calcPrice();
+    }
+
     function calcPrice() {
       const type = workType.value;
       const days = +daysRange.value;
       const pages = +pagesRange.value;
 
       daysLabel.textContent = days + " дней";
-      pagesLabel.textContent = pages + " страниц";
+      pagesLabel.textContent = 
+        type === "prezentaciya" ? pages + " слайдов" : pages + " страниц";
 
       if (!type) { priceBox.textContent = "Цена: —"; return; }
 
       let base = prices[type];
-      let coefPages = pages / 40; // масштабируем относительно 40 стр.
-      let coefDays = 1 + (14 - days) * 0.1; // чем меньше дней, тем дороже
+      let coefPages = (type === "prezentaciya") ? pages / 10 : pages / 40;
+      let coefDays = 1 + (14 - days) * 0.1;
       let total = Math.round(base * coefPages * coefDays);
 
       priceBox.textContent = "Цена: " + total + " ₽";
       return total;
     }
 
-    workType.addEventListener("change", calcPrice);
+    workType.addEventListener("change", updatePagesSlider);
     daysRange.addEventListener("input", calcPrice);
     pagesRange.addEventListener("input", calcPrice);
 
@@ -140,15 +218,14 @@
       const formData = new FormData(form);
       const totalPrice = calcPrice();
 
-     const text = 
-  `📌 Новая заявка\n` +
-  `Тип работы: ${formData.get("type")}\n` +
-  `Объем: ${formData.get("pages")} ${workType.value === "prezentaciya" ? "слайдов" : "стр."}\n` +
-  `Срок: ${formData.get("days")} дней\n` +
-  `Пожелания: ${formData.get("details") || "—"}\n` +
-  `Контакты: ${formData.get("contact")}\n` +
-  `💰 Итоговая цена: ${totalPrice || "—"} ₽`;
-
+      const text = 
+        `📌 Новая заявка\n` +
+        `Тип работы: ${formData.get("type")}\n` +
+        `Объем: ${formData.get("pages")} ${workType.value === "prezentaciya" ? "слайдов" : "стр."}\n` +
+        `Срок: ${formData.get("days")} дней\n` +
+        `Пожелания: ${formData.get("details") || "—"}\n` +
+        `Контакты: ${formData.get("contact")}\n` +
+        `💰 Итоговая цена: ${totalPrice || "—"} ₽`;
 
       try {
         const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -174,69 +251,6 @@
       }
     });
 
-
-
-function updatePagesSlider() {
-  if (workType.value === "prezentaciya") {
-    pagesRange.min = 5;
-    pagesRange.max = 20;
-    if (pagesRange.value > 20) pagesRange.value = 10;
-    pagesLabel.textContent = pagesRange.value + " слайдов";
-  } else {
-    pagesRange.min = 20;
-    pagesRange.max = 80;
-    if (pagesRange.value < 20) pagesRange.value = 40;
-    pagesLabel.textContent = pagesRange.value + " страниц";
-  }
-  calcPrice();
-}
-
-function calcPrice() {
-  const type = workType.value;
-  const days = +daysRange.value;
-  const pages = +pagesRange.value;
-
-  daysLabel.textContent = days + " дней";
-  pagesLabel.textContent = 
-    type === "prezentaciya" ? pages + " слайдов" : pages + " страниц";
-
-  if (!type) { priceBox.textContent = "Цена: —"; return; }
-
-  let base = prices[type];
-  let coefPages;
-
-  if (type === "prezentaciya") {
-    coefPages = pages / 10; // масштабируем относительно 10 слайдов
-  } else {
-    coefPages = pages / 40; // масштабируем относительно 40 стр.
-  }
-
-  let coefDays = 1 + (14 - days) * 0.1;
-  let total = Math.round(base * coefPages * coefDays);
-
-  priceBox.textContent = "Цена: " + total + " ₽";
-  return total;
-}
-
-workType.addEventListener("change", updatePagesSlider);
-daysRange.addEventListener("input", calcPrice);
-pagesRange.addEventListener("input", calcPrice);
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-    // инициализация
     calcPrice();
   </script>
 </body>
